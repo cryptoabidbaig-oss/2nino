@@ -14,6 +14,7 @@ from database.database import add_user, del_user, full_userbase, present_user
 
 
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
+#@Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
     if not await present_user(id):
@@ -24,73 +25,100 @@ async def start_command(client: Client, message: Message):
     text = message.text
     if len(text)>7:
         try:
-            base64_string = text.split(" ", 1)[1]
+            payload = text.split(" ", 1)[1]
         except:
             return
-        string = await decode(base64_string)
-        argument = string.split("-")
-        if len(argument) == 3:
-            try:
-                start = int(int(argument[1]) / abs(client.db_channel.id))
-                end = int(int(argument[2]) / abs(client.db_channel.id))
-            except:
-                return
-            if start <= end:
-                ids = range(start,end+1)
-            else:
-                ids = []
-                i = start
-                while True:
-                    ids.append(i)
-                    i -= 1
-                    if i < end:
-                        break
-        elif len(argument) == 2:
-            try:
-                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
-            except:
-                return
-        temp_msg = await message.reply("Wait Dude...")
-        try:
-            messages = await get_messages(client, ids)
-        except:
-            await message.reply_text("​​​Tʜᴇʀᴇ ɪꜱ ᴅᴇꜰɪɴɪᴛᴇʟʏ ꜱᴏᴍᴇᴛʜɪɴɢ ᴡʀᴏɴɢ​...!")
+        
+        if not payload.startswith(("go_", "f_")):
+            base64_string = payload
+            new_link = f"https://t.me/{client.username}/myapp?startapp=get_{base64_string}"
+            await message.reply_text(
+                text="Click below to get File",
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                "Open Link",
+                                url=new_link
+                            )
+                        ]
+                    ]
+                )
+            )
             return
-        await temp_msg.delete()
-
-        for msg in messages:
-
-            if bool(CUSTOM_CAPTION) & bool(msg.document):
-                caption = CUSTOM_CAPTION.format(previouscaption = "" if not msg.caption else msg.caption.html, filename = msg.document.file_name)
-            else:
-                caption = "" if not msg.caption else msg.caption.html
-
-            if DISABLE_CHANNEL_BUTTON:
-                reply_markup = msg.reply_markup
-            else:
-                reply_markup = None
-
+        
+        elif payload.startswith("f_"):
             try:
-                await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
-                await asyncio.sleep(0.5)
-            except FloodWait as e:
-                await asyncio.sleep(e.x)
-                await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
+                #base64_string = text.split(" ", 1)[1]
+                base64_string = payload[2:]
             except:
-                pass
+                return
+            string = await decode(base64_string)
+            argument = string.split("-")
+            if len(argument) == 3:
+                try:
+                    start = int(int(argument[1]) / abs(client.db_channel.id))
+                    end = int(int(argument[2]) / abs(client.db_channel.id))
+                except:
+                    return
+                if start <= end:
+                    ids = range(start,end+1)
+                else:
+                    ids = []
+                    i = start
+                    while True:
+                        ids.append(i)
+                        i -= 1
+                        if i < end:
+                            break
+            elif len(argument) == 2:
+                try:
+                    ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+                except:
+                    return
+            temp_msg = await message.reply("Wait Dude...")
+            try:
+                messages = await get_messages(client, ids)
+            except:
+                await message.reply_text("âââTÊá´Êá´ Éªê± á´á´ê°ÉªÉ´Éªá´á´ÊÊ ê±á´á´á´á´ÊÉªÉ´É¢ á´¡Êá´É´É¢â...!")
+                return
+            await temp_msg.delete()
+
+            for msg in messages:
+
+                if bool(CUSTOM_CAPTION) & bool(msg.document):
+                    caption = CUSTOM_CAPTION.format(previouscaption = "" if not msg.caption else msg.caption.html, filename = msg.document.file_name)
+                else:
+                    caption = "" if not msg.caption else msg.caption.html
+
+                if DISABLE_CHANNEL_BUTTON:
+                    reply_markup = msg.reply_markup
+                else:
+                    reply_markup = None
+
+                try:
+                    await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
+                    await asyncio.sleep(0.5)
+                except FloodWait as e:
+                    await asyncio.sleep(e.x)
+                    await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
+                except:
+                    pass
+            return
+        
         return
     else:
         reply_markup = InlineKeyboardMarkup(
     [
         [
-            InlineKeyboardButton("ʜᴇʟᴘ​", callback_data="help")
+            InlineKeyboardButton("Êá´Êá´â", callback_data="help")
         ],
         [
-            InlineKeyboardButton("ᴄʜᴀɴɴᴇʟ", url="https://t.me/anime_pirates"),
-            InlineKeyboardButton("ᴏɴɢᴏɪɴɢ", url="https://t.me/Ongoing_Anime_pirates")
+            InlineKeyboardButton("á´Êá´É´É´á´Ê", url="https://t.me/anime_pirates"),
+            InlineKeyboardButton("á´É´É¢á´ÉªÉ´É¢", url="https://t.me/Ongoing_Anime_pirates")
         ],
         [
-            InlineKeyboardButton("💥ᴄʟᴏꜱᴇ💥", callback_data="close")
+            InlineKeyboardButton("ð¥á´Êá´ê±á´ð¥", callback_data="close")
         ]
     ]
 )
@@ -124,8 +152,8 @@ REPLY_ERROR = "<code>Use this command as a reply to any telegram message without
 async def not_joined(client: Client, message: Message):
     buttons = [
         [
-            InlineKeyboardButton(text="ᴄʜᴀɴɴᴇʟ", url=client.invitelink),
-            InlineKeyboardButton(text="ɢʀᴏᴜᴘ", url=client.invitelink2),
+            InlineKeyboardButton(text="á´Êá´É´É´á´Ê", url=client.invitelink),
+            InlineKeyboardButton(text="É¢Êá´á´á´", url=client.invitelink2),
         ]
     ]
     try:
@@ -189,7 +217,7 @@ async def send_text(client: Bot, message: Message):
                 pass
             total += 1
         
-        status = f"""<b><u>ʙʀᴏᴀᴅᴄᴀꜱᴛ...</u>
+        status = f"""<b><u>ÊÊá´á´á´á´á´ê±á´...</u>
 
 Total Users: <code>{total}</code>
 Successful: <code>{successful}</code>
@@ -203,3 +231,4 @@ Unsuccessful: <code>{unsuccessful}</code></b>"""
         msg = await message.reply(REPLY_ERROR)
         await asyncio.sleep(8)
         await msg.delete()
+
